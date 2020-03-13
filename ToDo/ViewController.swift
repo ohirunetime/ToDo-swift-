@@ -5,197 +5,129 @@
 //  Created by 慎之助 on 2020/03/10.
 //  Copyright © 2020 ohirune. All rights reserved.
 //
-
+import RealmSwift
 import UIKit
 
-class ViewController: UIViewController ,UITextFieldDelegate {
+class ViewController: UIViewController , UITableViewDelegate , UITableViewDataSource {
+    var ToDOList: Results<TodoModel>!
+    var sampleTableView: UITableView!
+    let RealmViewInstance = try! Realm()
+
     
-
-//    var ItemList : Results<TodoModel>!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUI()
-
-        // Do any additional setup after loading the view.
+        view.backgroundColor = UIColor.white
+    }
+    func navBar(){
+        let navBar = UINavigationBar()
+        
+        if #available(iOS 11.0, *){
+            navBar.frame.origin = self.view.safeAreaLayoutGuide.layoutFrame.origin
+            navBar.frame.size = CGSize(width: self.view.safeAreaLayoutGuide.layoutFrame.width, height: 44)
+        }else{
+            navBar.frame.origin = self.view.safeAreaLayoutGuide.layoutFrame.origin
+            navBar.frame.size = CGSize(width: self.view.frame.width, height: 44)
+        }
+        
+        let navItem : UINavigationItem = UINavigationItem(title: "ToDo")
+        navItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .compose , target: self, action: #selector(AddTodo(_:)))
+        navBar.pushItem(navItem, animated: true)
+        view.addSubview(navBar)
     }
     
-    private func setUI(){
-        let bottomBar = UIView(frame: CGRect(x: 0, y: self.view.frame.height-50, width: self.view.frame.width, height: 50))
-        bottomBar.backgroundColor=UIColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 1.0)
+    @objc func AddTodo(_ sender: UIBarButtonItem) {
+        let AddPage = AddPageController()
+        self.present(AddPage,animated: true ,completion: nil)
+    }
+    func tableViewUI() {
+        // tableviewを作成
+        self.sampleTableView = UITableView()
+
+        // iphonex 判別
+        if #available(iOS 11.0, *) {
+            
+            sampleTableView.frame.origin = self.view.safeAreaLayoutGuide.layoutFrame.origin
+            self.sampleTableView.frame = CGRect(x: 0, y: 88, width: self.view.frame.width, height: self.view.frame.height)
+            print("iphone 8")
+            
+        }else{
+            sampleTableView.frame.origin = self.view.safeAreaLayoutGuide.layoutFrame.origin
+            self.sampleTableView.frame = CGRect(x: 0, y: 34, width: self.view.frame.width, height: self.view.frame.height)
+            print("iphone x")
+            
+        }
         
-        let button = UIButton(frame:CGRect(x: 0, y: 0, width: 80, height: 30))
-        button.backgroundColor=UIColor(red: 0.25, green: 0.60, blue: 0.75, alpha: 1.0)
+        // realm database
         
-        button.setTitle("submit", for: .normal)
-        button.titleLabel?.font=UIFont(name: "Futura", size: 14)
-        button.setTitleColor(UIColor.white,for: .normal)
-        button.layer.cornerRadius = 5.0;
-        
-        let textField = UITextField(frame: CGRect(x: 0, y: 0, width: self.view.frame.size.width * 0.7, height: 30))
-        textField.borderStyle = .roundedRect
-        
-        button.translatesAutoresizingMaskIntoConstraints = false
-        bottomBar.translatesAutoresizingMaskIntoConstraints = false
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(bottomBar)
-        bottomBar.addSubview(textField)
-        bottomBar.addSubview(button)
+        self.ToDOList = RealmViewInstance.objects(TodoModel.self)
         
         
-        let bottomBarWidth = NSLayoutConstraint(
-            item: bottomBar,
-            attribute: .width,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: self.view.frame.size.width
-          )
-
-          let bottomBarLeading = NSLayoutConstraint(
-            item: bottomBar,
-            attribute: .leading,
-            relatedBy: .equal,
-            toItem: view,
-            attribute: .leading,
-            multiplier: 1.0,
-            constant: 0
-          )
-
-          let bottomBarTrailing = NSLayoutConstraint(
-            item: bottomBar,
-            attribute: .trailing,
-            relatedBy: .equal,
-            toItem: view,
-            attribute: .trailing,
-            multiplier: 1.0,
-            constant: 0
-          )
-
-          let bottomBarHeight = NSLayoutConstraint(
-            item: bottomBar,
-            attribute: .height,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: 50
-          )
-
-
-          let bottomBarConstraintBottom = NSLayoutConstraint(
-            item: bottomBar,
-            attribute: .bottom,
-            relatedBy: .equal,
-            toItem: self.view,
-            attribute: .bottom,
-            multiplier: 1.0,
-            constant: 0
-          )
-
-          //******* textField Constraints *******
-
-          // Set Center Y to textField
-          let textFieldCenterY = NSLayoutConstraint(
-            item: textField,
-            attribute: .centerY,
-            relatedBy: .equal,
-            toItem: bottomBar,
-            attribute: .centerY,
-            multiplier: 1.0,
-            constant: 0
-          )
-
-          let textFieldWidth = NSLayoutConstraint(
-            item: textField,
-            attribute: .width,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: textField.frame.size.width * 0.8
-          )
-
-          let textFieldHeight = NSLayoutConstraint(
-            item: textField,
-            attribute: .height,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: textField.frame.size.height
-          )
-
-          let textFieldLeading = NSLayoutConstraint(
-            item: textField,
-            attribute: .leading,
-            relatedBy: .equal,
-            toItem: bottomBar,
-            attribute: .leading,
-            multiplier: 1.0,
-            constant: 20
-          )
-
-
-
-
-
-         //******* Button Constraints *******
-
-         // Set Center Y to bottoBar
-         let buttonCenterY = NSLayoutConstraint(
-            item: button,
-            attribute: .centerY,
-            relatedBy: .equal,
-            toItem: bottomBar,
-            attribute: .centerY,
-            multiplier: 1.0,
-            constant: 0
-         )
-
-         let buttonWidth = NSLayoutConstraint(
-            item: button,
-            attribute: .width,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: button.frame.size.width
-         )
-
-         let buttonHeight = NSLayoutConstraint(
-            item: button,
-            attribute: .height,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: button.frame.size.height
-         )
-
-
-         let buttonLeading = NSLayoutConstraint(
-            item: button,
-            attribute: .leading,
-            relatedBy: .equal,
-            toItem: textField,
-            attribute: .trailing,
-            multiplier: 1.0,
-            constant: 20
-         )
-
-
-        // Add Constraints
-        bottomBar.addConstraints([ buttonLeading, buttonWidth, buttonHeight, buttonCenterY])
-        bottomBar.addConstraints([textFieldCenterY, textFieldHeight, textFieldWidth,textFieldLeading])
-        self.view.addConstraints([bottomBarConstraintBottom, bottomBarWidth, bottomBarHeight, bottomBarLeading, bottomBarTrailing])
-
-         
+        
+        // 設定するカスタムセルを指定。
+        // 今回はSampleCustomCellというクラスを参照させる。（後述）
+        self.sampleTableView.register(
+            SampleCustomCell.self,
+            forCellReuseIdentifier: "SampleCustomCell"
+        )
+        self.sampleTableView.dataSource = self
+        self.sampleTableView.delegate = self
+        self.view.addSubview(self.sampleTableView)
     }
     
+    
+    
+    // とりあえず、データ数を50に。
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.ToDOList.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // セルのインスタンスの作成
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "SampleCustomCell",
+            for: indexPath as IndexPath
+            ) as! SampleCustomCell
+        // cellオブジェクトのプロパティのsampleLabelに値をセット。
+        let todo : TodoModel = self.ToDOList[(indexPath as NSIndexPath).row]
+        cell.textLabel?.text = todo.content
+        return cell
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        //順番とviewDidLoad()の中じゃないことに注意！！！
+        navBar()
+        
+        tableViewUI()
+        
+    }
+    func update(){
+        self.sampleTableView.reloadData()
+        
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete  {
+            try! RealmViewInstance.write{
+                    RealmViewInstance.delete(self.ToDOList[indexPath.row])
+                    self.sampleTableView.reloadData()
+                    print("削除できたよー")
 
+                                
 
+            }
+            
+
+        }
+    }
+    
+    
+    
+    
 }
 

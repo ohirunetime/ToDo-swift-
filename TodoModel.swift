@@ -9,5 +9,5 @@ import Foundation
 import RealmSwift
 
 class TodoModel: Object{
-    @objc dynamic var todo : String? = nil
+    @objc dynamic var content : String? = nil
 }
